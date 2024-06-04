@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fake News Detector</title>
+    <style>
+        .red_back {
+            background-color: red;
+        }
+        .red_front {
+            color: red;
+        }
+        .green_back {
+            background-color: #4CAF50;
+        }
+        .green_front {
+            color: #4CAF50;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            text-align: center;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333333;
+        }
+        form {
+            margin-top: 20px;
+        }
+        input[type="text"] {
+            padding: 10px;
+            width: 60%;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+        }
+        input[type="submit"] {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+        h2 {
+            margin-top: 20px;
+            color: #4CAF50;
+        }
+    </style>
+</head>
+<body class="{{color_back}}">
+    <div class="container">
+        <h1>Fake News Detector</h1>
+        <form action="/predict" method="post">
+            <label for="url" style="color: #333333;">Enter News Article URL:</label>
+            <br>
+            <input type="text" id="url" name="url">
+            <br>
+            <input type="submit" value="Check">
+        </form>
+        {% if prediction , color_back, color_front %}
+            <h2 class={{color_front}}>{{ prediction }}</h2>
+        {% endif %}
+    </div>
+</body>
+</html>
