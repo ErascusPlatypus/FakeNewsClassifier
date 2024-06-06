@@ -5,6 +5,7 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 import joblib
 import logging
+import combine_files
 
 app = Flask(__name__)
 
@@ -15,7 +16,36 @@ logging.basicConfig(level=logging.INFO)
 logging.info('Flask Server is active')
 
 # Load the Keras model
-model = load_model('fake_news_classifier.h5')
+# model = load_model('fake_news_classifier.h5')
+# model = load_model('news_classifier')
+
+# URL of the shared file on Google Drive
+# file_url = "https://drive.google.com/uc?id=15WnxStJuD7f8hErFbeurC4lQXxpbQqVc"
+
+# # Download the file
+# r = requests.get(file_url, stream=True)
+
+# # Save the file locally
+# with open("classifier.h5", "wb") as f:
+#     f.write(r.content)
+
+# model = load_model('classifier.h5')
+
+# Google Drive file ID
+# file_id = "15WnxStJuD7f8hErFbeurC4lQXxpbQqVc"
+# file_url = f"https://drive.google.com/uc?id={file_id}"
+# output = "classifier.h5"
+
+# # Download the file
+# if not os.path.exists(output):
+#     gdown.download(file_url, output, quiet=False)
+
+# # Load the Keras model
+# model = load_model(output)
+
+combine_files.join_files()
+
+model = load_model("fake_news_classifier - Copy_2.h5")
 logging.info('Model loaded successfully')
 
 # Load the tokenizer
@@ -82,4 +112,5 @@ def extract_text_from_url(url):
         return None
 
 if __name__ == '__main__':
+    # combine_files.join_files()
     app.run(debug=True)
