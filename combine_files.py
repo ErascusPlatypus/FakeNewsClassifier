@@ -17,7 +17,6 @@ def join_files() :
                     break
                 with open(part_name, "rb") as part_file:
                     out_file.write(part_file.read())
-                os.remove(part_name)  # Delete the part file after combining
                 part_num += 1
         print(f"File parts recombined into '{output_file}' and part files deleted.")
     except Exception as e:
