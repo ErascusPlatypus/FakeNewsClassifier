@@ -1,11 +1,11 @@
 from flask import Flask, request, render_template
 import requests
 from bs4 import BeautifulSoup
-from tensorflow.keras.models import load_model
-from tensorflow.keras.preprocessing.sequence import pad_sequences
 import joblib
 import logging
-import combine_files
+import numpy as np
+import tensorflow as tf
+from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 app = Flask(__name__)
 
@@ -15,38 +15,11 @@ logging.basicConfig(level=logging.INFO)
 # Log when the server starts
 logging.info('Flask Server is active')
 
-# Load the Keras model
-# model = load_model('fake_news_classifier.h5')
-# model = load_model('news_classifier')
-
-# URL of the shared file on Google Drive
-# file_url = "https://drive.google.com/uc?id=15WnxStJuD7f8hErFbeurC4lQXxpbQqVc"
-
-# # Download the file
-# r = requests.get(file_url, stream=True)
-
-# # Save the file locally
-# with open("classifier.h5", "wb") as f:
-#     f.write(r.content)
-
-# model = load_model('classifier.h5')
-
-# Google Drive file ID
-# file_id = "15WnxStJuD7f8hErFbeurC4lQXxpbQqVc"
-# file_url = f"https://drive.google.com/uc?id={file_id}"
-# output = "classifier.h5"
-
-# # Download the file
-# if not os.path.exists(output):
-#     gdown.download(file_url, output, quiet=False)
-
-# # Load the Keras model
-# model = load_model(output)
-
-combine_files.join_files()
-
-model = load_model("fake_news_classifier - Copy_2.h5")
-logging.info('Model loaded successfully')
+# Load the TFLite model
+tflite_model_path = 'sentiment_model_pruned_quantized.tflite'
+interpreter = tf.lite.Interpreter(model_path=tflite_model_path)
+interpreter.allocate_tensors()
+logging.info('TFLite model loaded successfully')
 
 # Load the tokenizer
 tokenizer = joblib.load('tokenizer.joblib')
@@ -55,12 +28,30 @@ logging.info('Tokenizer loaded successfully')
 # Define the max length for padding
 MAX_LEN = 250  # Replace this with your actual max length
 
-def sentiment(reviews):
+def preprocess_text(text):
     logging.info('Preprocessing text for prediction')
-    seqs = tokenizer.texts_to_sequences(reviews)
-    seqs = pad_sequences(seqs, maxlen=MAX_LEN)
+    seqs = tokenizer.texts_to_sequences([text])
+    padded_seqs = pad_sequences(seqs, maxlen=MAX_LEN)
     logging.info('Text preprocessing complete')
-    return model.predict(seqs)
+    return padded_seqs
+
+def sentiment(review):
+    # Preprocess the review text
+    input_data = preprocess_text(review)
+
+    # Get input and output tensors.
+    input_details = interpreter.get_input_details()
+    output_details = interpreter.get_output_details()
+
+    # Prepare the input data
+    interpreter.set_tensor(input_details[0]['index'], input_data.astype(np.float32))
+
+    # Run the model
+    interpreter.invoke()
+
+    # Get the prediction result
+    output_data = interpreter.get_tensor(output_details[0]['index'])
+    return output_data
 
 @app.route('/')
 def home():
@@ -79,21 +70,21 @@ def predict():
         logging.warning('Could not extract text from the URL')
         return render_template('index.html', prediction='Could not extract text from the URL.')
     
-    # Preprocess the text and make a prediction
+    # Make a prediction
     logging.info('Making prediction')
-    prediction = sentiment([article_text])
+    prediction = sentiment(article_text)
     
     # Convert prediction to a meaningful label
     logging.info(f'Predicted value of article is : {prediction[0][0]}')
     result = 'Fake' if prediction[0][0] < 0.5 else 'Real'  # Assuming binary classification with a sigmoid output
     logging.info(f'Prediction complete: {result}')
-    if result == 'Fake' :
+    if result == 'Fake':
         color_back = 'red_back'
         color_front = 'red_front'
-    else :
+    else:
         color_back = 'green_back'
         color_front = 'green_front'
-    return render_template('index.html', prediction=f'This news article is {result}.', color_back=color_back, color_front=color_front )
+    return render_template('index.html', prediction=f'This news article is {result}.', color_back=color_back, color_front=color_front)
 
 def extract_text_from_url(url):
     try:
@@ -112,5 +103,6 @@ def extract_text_from_url(url):
         return None
 
 if __name__ == '__main__':
-    # combine_files.join_files()
     app.run(debug=True)
+
+
