@@ -1,8 +1,7 @@
 beautifulsoup4==4.12.3
 Flask==3.0.3
-gdown==5.2.0
-h5py==3.11.0
 joblib==1.4.2
+numpy==1.26.4
 Requests==2.32.3
 tensorflow==2.15.0
-gunicorn
+
