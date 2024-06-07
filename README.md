@@ -1,5 +1,7 @@
 # fake_news_classifier
 
+You can visit the [website here](https://fake-news-classifier-w73t.onrender.com) 
+
 This repository contains the code for a Fake News Classifier that uses a Neural Network model to classify news articles as fake or real. The dataset used for training and testing the model is sourced from [Kaggle](https://www.kaggle.com). 
 
 ## Dataset
