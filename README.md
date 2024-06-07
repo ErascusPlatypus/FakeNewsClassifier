@@ -2,7 +2,9 @@
 
 You can visit the [website here](https://fake-news-classifier-w73t.onrender.com) 
 
-This repository contains the code for a Fake News Classifier that uses a Neural Network model to classify news articles as fake or real. The dataset used for training and testing the model is sourced from [Kaggle](https://www.kaggle.com). 
+The website is a simple implementation of the trained model. It runs on a Flask backend with the model saved and compressed to a Tflite version. Users can input the link of any news article that they want to check and the website will automatically extract the text from the website and run it through the model and output the result.
+
+This repository contains a Jupyter Notebook with code for a Fake News Classifier that uses a Neural Network model with word embeddings to classify news articles as fake or real. 
 
 ## Dataset
 
@@ -27,31 +29,12 @@ cd fake-news-classifier
 pip install -r requirements.txt
 ```
 
-## Usage
-
-1. **Preprocess the Data:** Run the script to preprocess the dataset and prepare it for training.
-
-```sh
-python preprocess_data.py
-```
-
-2. **Train the Model:** Train the Neural Network model on the preprocessed data.
-
-```sh
-python train_model.py
-```
-
-3. **Evaluate the Model:** Evaluate the model's performance on the validation set.
-
-```sh
-python evaluate_model.py
-```
-
 ## Files
-
-- `preprocess_data.py`: Script to preprocess the dataset.
-- `train_model.py`: Script to train the Neural Network model.
-- `evaluate_model.py`: Script to evaluate the model's performance.
+- `app.py` : Flask code for the backend of the website
+- `tokenizer.joblib` : tokenizer for the ML Model in a portable format
+- `sentiment_model_pruned_quantized.tflite` : The ML Model saved and compressed into a smaller size
+- `word_vec.ipynb` : Juoyter Notebook containing the Neural Network NLP Model
+- `templates/index.html` : Front-end of the website
 - `requirements.txt`: List of dependencies required to run the code.
 
 ## Acknowledgements
