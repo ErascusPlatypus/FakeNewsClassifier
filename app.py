@@ -61,7 +61,7 @@ def home():
     return render_template('index.html')
 
 @app.route('/extension/predict', methods=['POST'])
-def predict():
+def extension_predict():
     logging.info('Predict route accessed')
     data = request.get_json()
     url = data.get('url')
