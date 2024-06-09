@@ -1,4 +1,5 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, jsonify
+from flask_cors import CORS
 import requests
 from bs4 import BeautifulSoup
 import joblib
@@ -8,6 +9,7 @@ import tensorflow as tf
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 app = Flask(__name__)
+CORS(app)   # Enable CORS for all routes
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -57,6 +59,31 @@ def sentiment(review):
 def home():
     logging.info('Home page accessed')
     return render_template('index.html')
+
+@app.route('/extension/predict', methods=['POST'])
+def predict():
+    logging.info('Predict route accessed')
+    data = request.get_json()
+    url = data.get('url')
+    logging.info(f'URL received: {url}')
+    
+    article_text = extract_text_from_url(url)
+    
+    if not article_text:
+        logging.warning('Could not extract text from the URL')
+        return jsonify({'prediction': 'Could not extract text from the URL.'})
+    
+    # Make a prediction
+    logging.info('Making prediction')
+    prediction = sentiment(article_text)
+    
+    # Convert prediction to a meaningful label
+    logging.info(f'Predicted value of article is : {prediction[0][0]}')
+    result = 'Fake' if prediction[0][0] < 0.5 else 'Real'
+    logging.info(f'Prediction complete: {result}')
+    
+    return jsonify({'prediction': result})
+
 
 @app.route('/predict', methods=['POST'])
 def predict():
