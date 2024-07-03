@@ -9,26 +9,20 @@ import tensorflow as tf
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 app = Flask(__name__)
-CORS(app)   # Enable CORS for all routes
+CORS(app)   
 
-# Configure logging
 logging.basicConfig(level=logging.INFO)
 
-# Log when the server starts
 logging.info('Flask Server is active')
 
-# Load the TFLite model
 tflite_model_path = 'sentiment_model_pruned_quantized.tflite'
 interpreter = tf.lite.Interpreter(model_path=tflite_model_path)
 interpreter.allocate_tensors()
 logging.info('TFLite model loaded successfully')
-
-# Load the tokenizer
 tokenizer = joblib.load('tokenizer.joblib')
 logging.info('Tokenizer loaded successfully')
 
-# Define the max length for padding
-MAX_LEN = 250  # Replace this with your actual max length
+MAX_LEN = 250  
 
 def preprocess_text(text):
     logging.info('Preprocessing text for prediction')
@@ -38,20 +32,12 @@ def preprocess_text(text):
     return padded_seqs
 
 def sentiment(review):
-    # Preprocess the review text
     input_data = preprocess_text(review)
-
-    # Get input and output tensors.
     input_details = interpreter.get_input_details()
     output_details = interpreter.get_output_details()
 
-    # Prepare the input data
     interpreter.set_tensor(input_details[0]['index'], input_data.astype(np.float32))
-
-    # Run the model
     interpreter.invoke()
-
-    # Get the prediction result
     output_data = interpreter.get_tensor(output_details[0]['index'])
     return output_data
 
@@ -73,11 +59,9 @@ def extension_predict():
         logging.warning('Could not extract text from the URL')
         return jsonify({'prediction': 'Could not extract text from the URL.'})
     
-    # Make a prediction
     logging.info('Making prediction')
     prediction = sentiment(article_text)
-    
-    # Convert prediction to a meaningful label
+
     logging.info(f'Predicted value of article is : {prediction[0][0]}')
     result = 'Fake' if prediction[0][0] < 0.5 else 'Real'
     logging.info(f'Prediction complete: {result}')
@@ -96,14 +80,12 @@ def predict():
     if not article_text:
         logging.warning('Could not extract text from the URL')
         return render_template('index.html', prediction='Could not extract text from the URL.')
-    
-    # Make a prediction
+
     logging.info('Making prediction')
     prediction = sentiment(article_text)
-    
-    # Convert prediction to a meaningful label
+
     logging.info(f'Predicted value of article is : {prediction[0][0]}')
-    result = 'Fake' if prediction[0][0] < 0.5 else 'Real'  # Assuming binary classification with a sigmoid output
+    result = 'Fake' if prediction[0][0] < 0.5 else 'Real'  
     logging.info(f'Prediction complete: {result}')
     if result == 'Fake':
         color_back = 'red_back'
@@ -118,8 +100,7 @@ def extract_text_from_url(url):
         logging.info(f'Extracting text from URL: {url}')
         response = requests.get(url)
         soup = BeautifulSoup(response.content, 'html.parser')
-        
-        # Extract text based on HTML structure of news websites
+
         paragraphs = soup.find_all('p')
         article_text = ' '.join([p.get_text() for p in paragraphs])
         logging.info('Text extraction complete')
